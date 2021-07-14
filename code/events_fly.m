@@ -1,19 +1,19 @@
 function [value,isterminal,direction]=events_fly(t,X)
-
-l=0.15;
+global m g L
+L=0.15;
 x = X(1);
 y = X(2);
-theta_1 = X(3);
-theta_2 = X(4);
+theta1 = X(3);
+theta2 = X(4);
 
 xd = X(5);
 yd = X(6);
-theta_1d = X(7);
-theta_2d = X(8);
+theta1d = X(7);
+theta2d = X(8);
 
-r_P=[x-2*l*cos(theta_1),y-2*l*sin(theta_1)].';
-r_Q=[x;y];
-r_R = [x+2*l*cos(theta_1+theta_2),y+2*l*sin(theta_1+theta_2)].';
+r_P=[x;y];
+r_Q=[x+2*L*cos(theta1);y+2*L*sin(theta1)];
+r_R = r_Q + [2*l*cos(theta1+theta2),2*l*sin(theta1+theta2)];
 
 stop_fly = 1;
 if r_P(2) <= 0
