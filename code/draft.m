@@ -43,15 +43,35 @@ lambdan = lambda(2);
 %% stick
 rhs = simplify(M\(W.'*lambda+Fq-G-B));
 matlabFunction(rhs,'file','temp_stick')
+matlabFunction(lambdat,'file','temp_lam_t')
+matlabFunction(lambdan,'file','temp_lam_n')
+
 %% slip
 syms sigma mu
+Wt = [1 0 0 0];
+Wn = [0 1 0 0];
+Wtd = [0 0 0 0];
+Wnd = [0 0 0 0];
+
 rhs = simplify(M\( ([1 0 0 0].'-sigma*mu*[0 1 0 0].')*lambdan+Fq-G-B) );
-matlabFunction(rhs,'file','temp_slip')
+matlabFunction(rhs,'file','temp_slip_eom')
 rhs2 = simplify(M\( ([1 0 0 0].'-sigma*mu*[0 1 0 0].')*lambdan+Fq-G-B) );
-matlabFunction(rhs2(3:4),'file','temp_slip2')
+matlabFunction(rhs2(3:4),'file','temp_slip_eom_thetas')
+
+alpha = Wn/M*(Wn-sigma*mu*Wt).';
+beta = Wn/M*(B+G-Fq)-Wnd*qd;
+lambda_n_slip = simplify(beta/alpha);
+q_dd_slip = simplify( M\(-B-G+(Wn-sigma*mu*Wt).'*lambda_n_slip+Fq) ) ;
+lambda_n_dot = jacobian(lambda_n_slip,q)*qd+jacobian(lambda_n_slip,qd)*qdd;
+
+matlabFunction(lambda_n_slip,'file','temp_slip_lam_n')
+matlabFunction(lambda_n_slip,'file','temp_slip_lam_n_dot')
+
+
 %% fly
 rhs = simplify(M\(Fq-B-G));
 matlabFunction(rhs,'file','temp_fly')
 
-
+%% Inertia matrix
+matlabFunction(M,'file','temp_M')
 
