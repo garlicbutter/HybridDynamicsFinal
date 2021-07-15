@@ -1,13 +1,13 @@
 function tau = tau_calc(t)
 
 time0 = 0;
-time1 = 0.02;
-time2 = 0.06;
-time3 = 0.9;
+time1 = 0.05;
+time2 = 0.1;
+time3 = 0.15;
 
-f1 = @(t) 2; 
-f2 = @(t) -3; 
-f3 = @(t) 0;  
+f1 = @(t) -4;
+f2 = @(t) 8; 
+f3 = @(t) 4;  
 f4 = @(t) 0; 
 
 if time0 <= t && t<time1

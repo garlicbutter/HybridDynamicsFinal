@@ -1,7 +1,7 @@
 function Xnew = impact_law(Xold)
 % frictional fully plastic 
-global m g L mu 
-Ic = m*l^2/3;
+global m L mu 
+
 
 X = Xold(end,:);
 q = X(1:4).';
@@ -43,21 +43,31 @@ M = reshape([t7,0.0,t22,t18,0.0,t7,t19,t14,t22,t19,m.*t6.*(t13+6.0).*(2.0./3.0),
 W = [1,0,0,0;0,1,0,0];
 A = W/M* W.';
 v_minus = W*q_dot;
+
 %Chatterjee Law
-lamb1 = [0;-v_minus(2)/A(2,2)];
-lamb2 = -inv(A) * v_minus;
-en = 0; et = 0; %fully plastic
-Lambda_hat = (1+en)*lamb1 + (1+et)*(lamb2 - lamb1); %desired impulse
-Lt = Lambda_hat(1); Ln = Lambda_hat(2);
-if abs(Lt)<= mu*Ln
-    kappa = 1 + et;
-    fprintf('case 1') % if Lambda_t_hat <= mu Lambda_n
+lam1 = [0;-v_minus(2)/A(2,2)];
+lam2 = -inv(A) * v_minus;
+
+%fully plastic
+e_n = 0; e_t = 0;
+
+%desired impulse
+lam_hat = (1+e_n)*lam1 + (1+e_t)*(lam2 - lam1); 
+L_t = lam_hat(1);
+L_n = lam_hat(2);
+
+if abs(L_t)<= mu*L_n
+    % case 1
+    kappa = 1 + e_t;
+%     fprint('Impact case 1')
 else
-    kappa = (mu*(1+en)*lamb1(2))/(abs(lamb2(1))-mu*(lamb2(2)-lamb1(2)));
-    fprintf('case 2') % else
-end 
-Lambda = (1+en)*lamb1 + kappa*(lamb2 - lamb1);
-q_plus_dot = q_dot + inv(Mc) * Wc.'* Lambda;
-Xnew = [q;q_plus_dot];
+    % case 2
+    kappa = (mu*(1+e_n)*lam1(2))/(abs(lam2(1))-mu*(lam2(2)-lam1(2)));
+%     fprint('Impact case 2')
+end
+
+lambda = (1+e_n)*lam1 + kappa*(lam2 - lam1);
+q_dot_new = q_dot + M\W.'*lambda;
+Xnew = [q;q_dot_new];
 end
 

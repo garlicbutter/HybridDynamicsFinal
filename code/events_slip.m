@@ -41,9 +41,7 @@ ground_contact = 1;
 if r_Q(2) <= epsilon || r_R(2) <= epsilon
     ground_contact = 0;
 end
-if r_P(2) < -0.02
-    ground_contact = 0;
-end   
+
 value = [stop_slip,seperation,ground_contact];
 isterminal = [1,1,1];
 direction = [];

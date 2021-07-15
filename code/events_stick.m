@@ -30,9 +30,7 @@ ground_contact = 1;
 if r_Q(2) <= 0 || r_R(2) <= 0
     ground_contact = 0;
 end
-if r_P(2) < -0.02
-    ground_contact = 0;
-end    
+
 value = [ground_contact,stop_positive,stop_negative];
 isterminal = [1,1,1];
 direction = [];
