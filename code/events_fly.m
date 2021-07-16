@@ -11,9 +11,9 @@ r_R =r_Q+[2*L*cos(theta1+theta2);2*L*sin(theta1+theta2)];
 
 v_1 = [r_R.' 0] - [r_P.' 0];
 v_2 = [0,1,0];
-angle_constraint = atan2(norm(cross(v_1, v_2)), dot(v_1, v_2)) - deg2rad(60);
+angle_constraint = abs(atan2(norm(cross(v_1, v_2)), dot(v_1, v_2))) - deg2rad(60);
 
-value = [r_P(2),r_R(2),r_Q(2),angle_constraint];
+value = [r_P(2),r_R(2),r_Q(2),angle_constraint, abs(theta2)-pi,r_R(2)-r_Q(2),r_Q(2)-r_P(2)];
 isterminal = ones(1,length(value));
-direction = [-1,-1,-1,0];
+direction = [0,0,0,0,0,0,0];
 end

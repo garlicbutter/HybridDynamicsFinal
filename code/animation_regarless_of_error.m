@@ -12,8 +12,23 @@ for k = 1:n
     tau_plot(k) = tau_calc(t_tot(k));
 end
 % Animation
+%% plot tau
+figure(2)
+movegui("northeast")
+tau_plot = zeros(1,length(t_tot));
+for k = 1:length(t_tot)
+    tau_plot(k) = tau_calc(t_tot(k));
+end
+plot(t_tot,tau_plot)
+title("Actuation torque")
+xlabel('time [s]')
+ylabel('Torque [Nm]')
+grid on
+saveas(gcf,"../img/tau.png")
+%%
 figure(1)
-for k = 1:n
+movegui("northwest")
+for k = 1:2:n
     plot([rR(k,1) rQ(k,1)],[rR(k,2) rQ(k,2)],'linewidth',2,'color','blue')
     grid on 
     grid minor
@@ -31,3 +46,4 @@ for k = 1:n
     text(lim*0.2,lim*0.85,txt2)
     drawnow limitrate
 end
+

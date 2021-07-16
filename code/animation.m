@@ -13,6 +13,7 @@ phi = deg2rad(45); % angle between link1 and line PR
 inclined_theta = deg2rad(45);% angle between line PR and x axis
 
 % initialization
+global dt t_f
 t_0 = 0;
 t_f = 5;
 dt = 0.0005;
@@ -34,130 +35,66 @@ ie_fly = 0;
 % event_fly  :value = [stop_fly,r_R(2),r_Q(2),angle_constraint];
 t_event_change = [0];
 event_order = ["Start"];
-
-% simulation loop when the robot hasn't left the ground
-while true 
-    % Event stick before flying
-    if ie_slip==2
-        disp("sticking: "+num2str(t_tot(end)))
-        tspan = t_tot(end):dt:t_f;
-        X0 = X_tot(end,:);
-        op_stick = odeset('RelTol',1e-10,'AbsTol',1e-10,'Events',@events_stick);
-        [t_stick,X_stick,te_stick,Xe_stick,ie_stick] = ode45(@(t,X) sys_stick(t,X),tspan,X0,op_stick);
-        t_tot = [t_tot;t_stick(2:end)];
-        X_tot = [X_tot;X_stick(2:end,:)];
-        t_event_change = [t_event_change te_stick(end)];
-        event_order = [event_order;'Sticked before flying'];
-        if ie_stick(end) == 3
-            error("point R touched the ground while sticking before flying\n Run animation_regarless_of_error.m to see the animation")
-        end
-        if ie_stick(end) == 4
-            error("point Q touched the ground while sticking before flying\n Run animation_regarless_of_error.m to see the animation")
-        end
-    end
-    
-    % Event slip before flying
-    if  ie_stick(end) == 1 || ie_stick(end) == 2
-        disp("slipping: "+num2str(t_tot(end)))
-        tspan = t_tot(end):dt:t_f;
-        X0 = X_tot(end,:);
-        op_slip = odeset('RelTol',1e-6,'AbsTol',1e-6,'Events',@events_slip);
-        [t_slip,X_slip,te_slip,Xe_slip,ie_slip] = ode45(@(t,X) sys_slip(t,X),tspan,X0,op_slip);
-        t_event_change = [t_event_change te_slip(end)];
-        event_order = [event_order;'Slipped before flying'];
-        t_tot = [t_tot;t_slip(2:end)];
-        if ie_slip(end) == 3
-            error("point R touched the ground while slipping before flying\n Run animation_regarless_of_error.m to see the animation")
-        end
-        if ie_slip(end) == 4
-            error("point Q touched the ground while slipping before flying\n Run animation_regarless_of_error.m to see the animation")
-        end
-    end
-   
-    % Event fly
-    if ie_slip(end) == 1 || ie_stick(end) == 5
-        disp("flying:   "+num2str(t_tot(end)))
-        tspan = t_tot(end):dt:t_f;
-        X0 = X_tot(end,:);
-        op_fly = odeset('RelTol',1e-10,'AbsTol',1e-9,'Events',@events_fly);
-        [t_fly,X_fly,te_fly,Xe_fly,ie_fly] = ode45(@(t,X) sys_fly(t,X),tspan,X0,op_fly);
-        event_order = [event_order;'Flied'];
-        t_event_change = [t_event_change te_fly(end)];
-        t_tot = [t_tot;t_fly(2:end)];
-        X_tot = [X_tot;X_fly(2:end,:)];
-        if ie_fly(end) == 2
-            error("point R landed on the ground first\n Run animation_regarless_of_error.m to see the animation")
-        end
-        if ie_fly(end) == 3
-            error("point Q landed on the ground first\n Run animation_regarless_of_error.m to see the animation")
-        end
-        if ie_fly(end) == 4
-            error("line PR breached the angle constraint at time: "+ num2str(te_fly(end)))
-        end
-        break
-    end
-end
-% Impact
-if ie_fly == 1
-    % it landed on the ground
-    X0 = impact_law(Xe_fly);
-    X_tot(end,:) = X0;
-    % reset ie_handle.
-    ie_stick = 1; % assume sliding after landing
-    ie_slip = 1;
-else
-    error("Landed without impact?")
-end
-
-% simulation loop when the robot landed
+disp("Started: "+num2str(t_tot(end)))
 while true
-    % Event Slip
-    if  ie_stick == 1 || ie_stick == 2
-        disp("contact+slipping: "+num2str(t_tot(end)))
-        tspan = t_tot(end):dt:t_f;
-        X0 = X_tot(end,:);
-        op_slip = odeset('RelTol',1e-10,'AbsTol',1e-10,'Events',@events_slip);
-        [t_slip,X_slip,te_slip,Xe_slip,ie_slip] = ode45(@(t,X) sys_slip(t,X),tspan,X0,op_slip);
-        t_event_change = [t_event_change te_slip];
-        event_order = [event_order;'Slipped after landing'];
-        t_tot = [t_tot;t_slip(2:end)];
-        X_tot = [X_tot;X_slip(2:end,:)];
-        if ie_slip == 2
-            error("It left the ground again after it landed")
-        end
-        if ie_slip == 3
-            event_order(end) = "Point R touched the ground after slipping";
+    [t_tot,...
+     X_tot,...
+     ie_slip,...
+     ie_stick,...
+     ie_fly,...
+     t_event_change,...
+     event_order]          =    ground_simulation(t_tot,X_tot,ie_slip,ie_stick,ie_fly,t_event_change,event_order);
+        if ie_slip(end)==3 || ie_slip(end)==4 || ie_stick(end)==3 || ie_stick(end)==4
             break
         end
-        if ie_slip == 4
-            event_order(end) = "Point Q touched the ground after slipping";
-            break
+        
+    lam_n = -1;     %just for keep running the simulation
+    lam_n_slip = -1;%just for keep running the simulation
+        while lam_n < 0 && lam_n_slip < 0
+            [t_tot,...
+             X_tot,...
+             ie_fly,...
+             t_event_change,...
+             event_order]          =    air_simulation(t_tot,X_tot,t_event_change,event_order);
+            [lam_n,lam_t,lam_n_slip] = lam_calc(X_tot(end,:),tau_calc(t_tot(end)));
+            if ie_fly(end) ~= 1
+                animation_regarless_of_error
+                error("ie_fly")
+            end
+            % Impact
+            X0 = impact_law(X_fly(end,:));
+            X_tot(end,:) = X0;
+            disp("impacted:"+num2str(t_tot(end)))
         end
-    end
-    % Event stick
-    if ie_slip==1
-        disp("contact+sticking: "+num2str(t_tot(end)))
-        tspan = t_tot(end):dt:t_f;
-        X0 = X_tot(end,:);
-        op_stick = odeset('RelTol',1e-10,'AbsTol',1e-10,'Events',@events_stick);
-        [t_stick,X_stick,te_stick,Xe_stick,ie_stick] = ode45(@(t,X) sys_stick(t,X),tspan,X0,op_stick);
-        t_tot = [t_tot;t_stick(2:end)];
-        X_tot = [X_tot;X_stick(2:end,:)];
-        t_event_change = [t_event_change te_stick];
-        event_order = [event_order;'Sticked after landing'];
-        if ie_stick == 3
-            event_order(end) = "Point R touched the ground after sticking";
-            break
-        end
-        if ie_stick == 4
-            event_order(end) = "Point Q touched the ground after sticking";
-            break
-        end
-        if ie_stick == 5
-            error("It left the ground again after it landed")
-        end
+
+    if lam_t-mu > lam_n
+        ie_stick = 1;
+        ie_slip = 0;
+    elseif lam_t-mu < lam_n
+        ie_stick = 2;
+        ie_slip = 0;
+    else
+        ie_stick = 0;
+        ie_slip = 2;
     end
 end
+
+rP=[X_tot(end,1),X_tot(end,2)];
+rQ=[X_tot(end,1)+2*L*cos(X_tot(end,3)),X_tot(end,2)+2*L*sin(X_tot(end,3))];
+rR=rQ + [2*L*cos(X_tot(end,3)+X_tot(end,4)),2*L*sin(X_tot(end,3)+X_tot(end,4))];
+if ie_slip == 3
+    d_end = min([rP(end,1), rR(end,1)]);
+elseif ie_slip == 4
+    d_end = min([rP(end,1), rQ(end,1)]);
+elseif ie_stick == 3
+    d_end = min([rP(end,1), rR(end,1)]);
+elseif ie_stick == 4
+    d_end = min([rP(end,1), rQ(end,1)]);
+else
+    error("how did you get here without Q,R landing")
+end
+distance_jump = d_end;
+
 
 disp("Simulation terminated")
 % state space to link position
@@ -173,11 +110,10 @@ for i = 1:length(t_event_change)
    txt = sprintf('%-25s %1.3f',event_order(i),t_event_change(i));
    disp(txt+["s"]) 
 end
-disp("ie-stick:"+num2str(ie_stick(end)))
-disp("ie-slip: "+num2str(ie_slip(end)))
-disp("ie-fly:  "+num2str(ie_fly(end)))
-distance = min([rP(end,1), rQ(end,1), rR(end,1)]);
-disp("Jump Distance:"+num2str(distance))
+% disp("ie-stick:"+num2str(ie_stick(end)))
+% disp("ie-slip: "+num2str(ie_slip(end)))
+% disp("ie-fly:  "+num2str(ie_fly(end)))
+disp("Jump Distance:"+num2str(distance_jump))
 f1_char = func2str(f1);
 f2_char = func2str(f2);
 f3_char = func2str(f3);
@@ -187,7 +123,7 @@ f2_char = f2_char(5:end);
 f3_char = f3_char(5:end);
 f4_char = f4_char(5:end);
 file_name = "tau_trial_and_error.xls";
-savedata = {time0,time1,time2,time3,f1_char,f2_char,f3_char,f4_char,distance,rad2deg(phi),rad2deg(inclined_theta)};
+savedata = {time0,time1,time2,time3,f1_char,f2_char,f3_char,f4_char,distance_jump,rad2deg(phi),rad2deg(inclined_theta)};
 writecell(savedata,file_name,'WriteMode','append')
 disp("Saved the data to: " + file_name) 
 tau_plot = zeros(1,length(t_tot));
@@ -197,13 +133,13 @@ end
 % Animation
 figure(1)
 for k = 1:n
-    plot([rR(k,1) rQ(k,1)],[rR(k,2) rQ(k,2)],'linewidth',2,'color','blue')
+    plot([rR(k,1) rQ(k,1)],[rR(k,2) rQ(k,2)],'linewidth',3,'color','blue')
     grid on 
     grid minor
     hold on
-    plot([rP(k,1) rQ(k,1)],[rP(k,2) rQ(k,2)],'linewidth',2,'color','red')
+    plot([rP(k,1) rQ(k,1)],[rP(k,2) rQ(k,2)],'linewidth',3,'color','red')
     plot(rCG_x(k),rCG_y(k),'b*')
-    yline(0,'linewidth',3,'color','black')
+    yline(0,'linewidth',2,'color','black')
     hold off
     lim = 1.5;
     xlim([-0.3,-0.3+lim])
