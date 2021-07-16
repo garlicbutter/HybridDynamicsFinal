@@ -27,7 +27,7 @@ r_R = r_Q + [2*L*cos(theta1+theta2);2*L*sin(theta1+theta2)];
 
 value = [lam_n_slip,vt,r_R(2),r_Q(2)];
 isterminal = ones(1,length(value));
-direction = [-1,0,-1,-1];
+direction = [-1,1,-1,-1];
 if sigma == 1
     direction(2) = -1;
 end

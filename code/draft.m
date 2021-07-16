@@ -20,7 +20,7 @@ V = 2*m*g*rCG(2);
 V = simplify(V);
 
 syms tau
-Fq = [0;0;tau;tau];
+Fq = [0;0;0;tau];
 
 q=[x;y;theta1;theta2];
 qd=[xd;yd;theta1d;theta2d];

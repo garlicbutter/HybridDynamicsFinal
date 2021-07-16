@@ -9,8 +9,8 @@ L=0.15;
 mu = 0.3;
 
 % initial condition
-phi = deg2rad(55); % angle between link1 and line PR
-inclined_theta = deg2rad(55);% angle between line PR and x axis
+phi = deg2rad(45); % angle between link1 and line PR
+inclined_theta = deg2rad(45);% angle between line PR and x axis
 
 % initialization
 t_0 = 0;
@@ -46,36 +46,36 @@ while true
         [t_stick,X_stick,te_stick,Xe_stick,ie_stick] = ode45(@(t,X) sys_stick(t,X),tspan,X0,op_stick);
         t_tot = [t_tot;t_stick(2:end)];
         X_tot = [X_tot;X_stick(2:end,:)];
-        t_event_change = [t_event_change te_stick];
+        t_event_change = [t_event_change te_stick(end)];
         event_order = [event_order;'Sticked before flying'];
-        if ie_stick == 3
+        if ie_stick(end) == 3
             error("point R touched the ground while sticking before flying\n Run animation_regarless_of_error.m to see the animation")
         end
-        if ie_stick == 4
+        if ie_stick(end) == 4
             error("point Q touched the ground while sticking before flying\n Run animation_regarless_of_error.m to see the animation")
         end
     end
     
     % Event slip before flying
-    if  ie_stick == 1 || ie_stick == 2
+    if  ie_stick(end) == 1 || ie_stick(end) == 2
         disp("slipping: "+num2str(t_tot(end)))
         tspan = t_tot(end):dt:t_f;
         X0 = X_tot(end,:);
-        op_slip = odeset('RelTol',1e-9,'AbsTol',1e-9,'Events',@events_slip);
+        op_slip = odeset('RelTol',1e-6,'AbsTol',1e-6,'Events',@events_slip);
         [t_slip,X_slip,te_slip,Xe_slip,ie_slip] = ode45(@(t,X) sys_slip(t,X),tspan,X0,op_slip);
-        t_event_change = [t_event_change te_slip];
+        t_event_change = [t_event_change te_slip(end)];
         event_order = [event_order;'Slipped before flying'];
         t_tot = [t_tot;t_slip(2:end)];
-        if ie_slip == 3
+        if ie_slip(end) == 3
             error("point R touched the ground while slipping before flying\n Run animation_regarless_of_error.m to see the animation")
         end
-        if ie_slip == 4
+        if ie_slip(end) == 4
             error("point Q touched the ground while slipping before flying\n Run animation_regarless_of_error.m to see the animation")
         end
     end
    
     % Event fly
-    if ie_slip == 1 || ie_stick == 5
+    if ie_slip(end) == 1 || ie_stick(end) == 5
         disp("flying:   "+num2str(t_tot(end)))
         tspan = t_tot(end):dt:t_f;
         X0 = X_tot(end,:);
@@ -92,7 +92,7 @@ while true
             error("point Q landed on the ground first\n Run animation_regarless_of_error.m to see the animation")
         end
         if ie_fly(end) == 4
-            error("line PR breached the angle constraint at time: "+ num2str(te_fly))
+            error("line PR breached the angle constraint at time: "+ num2str(te_fly(end)))
         end
         break
     end

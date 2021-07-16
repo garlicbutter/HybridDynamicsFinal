@@ -2,14 +2,14 @@ function tau = tau_calc(t)
 
 global time0 time1 time2 time3
 time0 = 0;
-time1 = 0.05;
-time2 = 0.10;
+time1 = 0.045;
+time2 = 0.15;
 time3 = 0.30;
 
 global f1 f2 f3 f4
-f1 = @(t) 9 -2000*(t-0.04)^2;
-f2 = @(t) -5*20*t; 
-f3 = @(t) -0.5;  
+f1 = @(t) 10 -1500*(t-0.04)^2;
+f2 = @(t) -5* exp(t); 
+f3 = @(t) 5;  
 f4 = @(t) 1; 
 
 if time0 <= t && t<time1
