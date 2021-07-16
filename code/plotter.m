@@ -3,12 +3,12 @@ close all
 %% plot movement
 figure(1)
 movegui("northwest")
-for k = 1:50:n
+for k = 1:50:length(t_tot)
     if k == 1
         plot([rR(k,1) rQ(k,1)],[rR(k,2) rQ(k,2)],'linewidth',3,'color','blue')
         hold on
         plot([rP(k,1) rQ(k,1)],[rP(k,2) rQ(k,2)],'linewidth',3,'color','red')
-    elseif k ~= n
+    elseif k ~= length(t_tot)
         hold on
         plot([rR(k,1) rQ(k,1)],[rR(k,2) rQ(k,2)],'--b')
         hold on
@@ -37,7 +37,7 @@ saveas(gcf,"../img/movement.png")
 figure(2)
 movegui("northeast")
 tau_plot = zeros(1,length(t_tot));
-for k = 1:n
+for k = 1:length(t_tot)
     tau_plot(k) = tau_calc(t_tot(k));
 end
 plot(t_tot,tau_plot)
@@ -84,6 +84,7 @@ lam_n_plot = zeros(1,length(t_tot));
 lam_t_plot = zeros(1,length(t_tot));
 for i = 2:length(t_event_change)
     idx1 = find(t_tot==t_event_change(i));
+    error()
     if event_order(i) == ["flied:   "]
         for j = idx0:idx1
             lam_n_plot(j) = 0;

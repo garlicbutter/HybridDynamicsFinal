@@ -1,3 +1,4 @@
+close all
 % state space to link position
 n=size(X_tot,1);
 rP=[X_tot(:,1),X_tot(:,2)];
