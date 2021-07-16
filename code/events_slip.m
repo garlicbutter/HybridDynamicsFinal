@@ -36,13 +36,12 @@ if  lam_n_slip <= 0 && lam_n_dot < 0
     seperation = 0;
 end
 
-epsilon = -1e-11;
 ground_contact = 1;
-if r_Q(2) <= epsilon || r_R(2) <= epsilon
+if r_Q(2) <= 0 || r_R(2) <= 0
     ground_contact = 0;
 end
 
 value = [stop_slip,seperation,ground_contact];
 isterminal = [1,1,1];
-direction = [];
+direction = [-1,-1,-1];
 end
