@@ -62,11 +62,8 @@ while true
     if ie_slip(end)==3 || ie_slip(end)==4 || ie_stick(end)==3 || ie_stick(end)==4
         break
     end
-        
-    lam_n = -1;     %just for keep running the simulation
-    lam_n_slip = -1;%just for keep running the simulation
-    
-    while lam_n_slip < 0
+    [lam_n,lam_t,lam_n_slip] = lam_calc(X_tot(end,:),tau_calc(t_tot(end)));
+    while lam_n_slip < 0 || lam_n_dot <0
         [t_tot,...
          X_tot,...
          ie_fly,...
@@ -77,15 +74,16 @@ while true
             error("ie_fly")
         end
         % Impact
-        X0 = impact_law(X_tot(end,:));
-        X_tot(end,:) = X0;
+        X_new = impact_law(X_tot(end,:));
+        X_tot(end,:) = X_new;
         [lam_n,lam_t,lam_n_slip] = lam_calc(X_tot(end,:),tau_calc(t_tot(end)));
+        lam_n_dot = lam_n_dot(t_tot(end),X_tot(end,:));
     end
-    disp("flied:   "+num2str(t_tot(end)))% if ie_fly(end) == 4
+    disp("flied:   "+num2str(t_tot(end)))
     event_order = [event_order;'Flied'];
     t_event_change = [t_event_change t_tot(end)];
     
-    if mu*lam_n > abs(lam_t)
+    if mu*lam_n_slip > abs(lam_t)
         ie_slip = 2; % start out as sticking
         ie_stick = 0;
         ie_fly = 0;
@@ -130,7 +128,8 @@ end
 % disp("ie-stick:"+num2str(ie_stick(end)))
 % disp("ie-slip: "+num2str(ie_slip(end)))
 % disp("ie-fly:  "+num2str(ie_fly(end)))
-disp("Jump Distance:"+num2str(distance_jump))
+txt = sprintf('%-25s %1.3f',"Jump Distance",distance_jump);
+disp(txt+["m"]) 
 f1_char = func2str(f1);
 f2_char = func2str(f2);
 f3_char = func2str(f3);
@@ -150,13 +149,13 @@ end
 % Animation
 figure(1)
 for k = 1:3:n
-    plot([rR(k,1) rQ(k,1)],[rR(k,2) rQ(k,2)],'linewidth',3,'color','blue')
+    plot([rR(k,1) rQ(k,1)],[rR(k,2) rQ(k,2)],'linewidth',3.5,'color','blue')
     grid on 
     grid minor
     hold on
-    plot([rP(k,1) rQ(k,1)],[rP(k,2) rQ(k,2)],'linewidth',3,'color','red')
+    plot([rP(k,1) rQ(k,1)],[rP(k,2) rQ(k,2)],'linewidth',3.5,'color','red')
     plot(rCG_x(k),rCG_y(k),'b*')
-    yline(0,'linewidth',2,'color','black')
+    yline(-0.01,'linewidth',2,'color','black')
     hold off
     lim = 1.5;
     xlim([-0.3,-0.3+lim])

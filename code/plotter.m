@@ -76,36 +76,6 @@ legend('Location','best')
 grid on
 saveas(gcf,"../img/thetas.png")
 %% calculate lambda
-% m=0.3;
-% g=9.8;
-% L=0.15;
-% n = length(t_tot);
-% idx0 = 1;
-% lam_n_plot = zeros(1,length(t_tot));
-% lam_n_slip_plot = zeros(1,length(t_tot));
-% lam_t_plot = zeros(1,length(t_tot));
-% l = 0.15;
-% for i = 1:length(tau_plot)
-%     x=X_tot(i,1);
-%     y=X_tot(i,2);
-%     theta1=X_tot(i,3);
-%     theta2=X_tot(i,4);
-%     xd=X_tot(i,5);
-%     yd=X_tot(i,6);
-%     theta1d=X_tot(i,7);
-%     theta2d=X_tot(i,8);
-%     tau = tau_calc(t_tot(i));
-%     sigma = sign(xd);
-%     lam_t_plot(i) = (21*tau*sin(theta1 + theta2) - 27*tau*sin(theta1) - 27*tau*sin(theta1 - theta2) + 9*tau*sin(theta1 + 2*theta2) + 90*L^2*m*theta1d^2*cos(theta1) + 18*L^2*m*theta1d^2*cos(theta1 - theta2) - 6*L^2*m*theta1d^2*cos(theta1 + 2*theta2) + 18*L^2*m*theta2d^2*cos(theta1 - theta2) - 27*L*g*m*sin(2*theta1) + 10*L^2*m*theta1d^2*cos(theta1 + theta2) + 10*L^2*m*theta2d^2*cos(theta1 + theta2) + 3*L*g*m*sin(2*theta1 + 2*theta2) + 20*L^2*m*theta1d*theta2d*cos(theta1 + theta2) + 36*L^2*m*theta1d*theta2d*cos(theta1 - theta2))/(2*L*(9*cos(2*theta2) - 23));
-%     lam_n_plot(i) = (27*tau*cos(theta1) - 21*tau*cos(theta1 + theta2) + 27*tau*cos(theta1 - theta2) - 9*tau*cos(theta1 + 2*theta2) - 41*L*g*m + 10*L^2*m*theta1d^2*sin(theta1 + theta2) + 10*L^2*m*theta2d^2*sin(theta1 + theta2) + 90*L^2*m*theta1d^2*sin(theta1) + 18*L^2*m*theta1d^2*sin(theta1 - theta2) - 6*L^2*m*theta1d^2*sin(theta1 + 2*theta2) + 18*L^2*m*theta2d^2*sin(theta1 - theta2) + 27*L*g*m*cos(2*theta1) + 9*L*g*m*cos(2*theta2) - 3*L*g*m*cos(2*theta1 + 2*theta2) + 20*L^2*m*theta1d*theta2d*sin(theta1 + theta2) + 36*L^2*m*theta1d*theta2d*sin(theta1 - theta2))/(2*L*(9*cos(2*theta2) - 23));
-%     lam_n_slip_plot(i) = (3*tau*cos(theta1 + theta2) - 81*tau*cos(theta1) - 27*tau*cos(theta1 - theta2) + 9*tau*cos(theta1 + 2*theta2) + 41*L*g*m + 2*L^2*m*theta1d^2*sin(theta1 + theta2) + 2*L^2*m*theta2d^2*sin(theta1 + theta2) - 54*L^2*m*theta1d^2*sin(theta1) - 18*L^2*m*theta1d^2*sin(theta1 - theta2) + 6*L^2*m*theta1d^2*sin(theta1 + 2*theta2) - 18*L^2*m*theta2d^2*sin(theta1 - theta2) - 9*L*g*m*cos(2*theta2) + 4*L^2*m*theta1d*theta2d*sin(theta1 + theta2) - 36*L^2*m*theta1d*theta2d*sin(theta1 - theta2))/(2*L*(27*cos(2*theta1) - 9*cos(2*theta2) - 3*cos(2*theta1 + 2*theta2) + 27*mu*sigma*sin(2*theta1) - 3*mu*sigma*sin(2*theta1 + 2*theta2) + 41));
-% end
-% idx1 = find(t_tot==t_event_change(2));
-% idx2 = find(t_tot==t_event_change(3));
-% lam_n_plot(idx1:idx2) = zeros(1,idx2-idx1+1);
-% lam_t_plot(idx1:idx2) = zeros(1,idx2-idx1+1);
-% lam_n_slip_plot(idx1:idx2) = zeros(1,idx2-idx1+1);
-
 for i = 2:length(t_event_change)
     idx0 = find(t_tot==t_event_change(i-1));
     idx1 = find(t_tot==t_event_change(i)) -1 ;

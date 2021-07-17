@@ -37,7 +37,7 @@ A = W/M* W.';
 v_minus = W*q_dot;
 %Chatterjee
 Lam_1 = [0;-v_minus(2)/A(2,2)];
-Lam_2 = -inv(A) * v_minus;
+Lam_2 = -A\v_minus;
 %fully plastic
 e_n = 0; e_t = 0;
 %desired impulse
