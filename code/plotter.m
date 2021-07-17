@@ -94,8 +94,12 @@ for i = 2:length(t_event_change)
     elseif event_order(i) == ["Slipped"]
         for j = idx0:idx1
             [lam_n,lam_t,lam_n_slip] = lam_calc(X_tot(j,:),tau_calc(t_tot(j)));
-            lam_n_plot(j) = lam_n_slip;
-            lam_t_plot(j) = lam_t;
+                lam_n_plot(j) = lam_n_slip;
+                lam_t_plot(j) = lam_t;
+            if lam_n_slip * mu < abs(lam_t)
+                lam_n_plot(j) = lam_n_slip;
+                lam_t_plot(j) = 0.05*lam_t;
+            end
         end
     else
         error()
@@ -186,4 +190,3 @@ for i = 1:length(t_event_change)
     end
 end
 grid on
-saveas(gcf,"../img/lambda_n.png")
