@@ -25,7 +25,7 @@ tau=tau_calc(t);
 r_Q=[x+2*L*cos(theta1);y+2*L*sin(theta1)];
 r_R = r_Q + [2*L*cos(theta1+theta2);2*L*sin(theta1+theta2)];
 
-value = [lam_n_slip,vt,r_R(2),r_Q(2)];
+value = [lam_n_slip+0.01,vt,r_R(2),r_Q(2)];
 isterminal = ones(1,length(value));
 direction = [-1,1,-1,-1];
 if sigma == 1

@@ -4,21 +4,25 @@ global time0 time1 time2 time3
 global f1 f2 f3 f4
 sigma = 1;
 m=0.3;
-g=9.80665;
+g=10;
 L=0.15;
 mu = 0.3;
 
 % initial condition
-phi = deg2rad(45); % angle between link1 and line PR
-inclined_theta = deg2rad(45);% angle between line PR and x axis
-
+phi = deg2rad(54); % angle between link1 and line PR
+inclined_theta = deg2rad(55);% angle between line PR and x axis
+theta1_0 = inclined_theta + phi;
+theta2_0 = -2 * phi;
+% theta1_0 = deg2rad(45);
+% theta2_0 = deg2rad(45);
+% phi = theta2_0 / (-2) ;
+% inclined_theta = theta1_0 - phi;
 % initialization
 global dt t_f
 t_0 = 0;
-t_f = 5;
+t_f = 3;
 dt = 0.0005;
-theta1_0 = inclined_theta + phi;
-theta2_0 = -2 * phi;
+
 rQ0 = [2*L*cos(theta1_0);2*L*sin(theta1_0)];
 rR0 = rQ0 + [2*L*cos(theta1_0+theta2_0);2*L*sin(theta1_0+theta2_0)];
 if rQ0(2)>rR0(2)
@@ -27,9 +31,19 @@ end
 X0 = [0, 0, theta1_0, theta2_0, 0, 0, 0, 0];
 t_tot(1) = t_0;
 X_tot(1,:) = X0;
-ie_slip = 2; % start out as sticking
-ie_stick = 0;
-ie_fly = 0;
+[lam_n,lam_t,lam_n_slip] = lam_calc(X0,tau_calc(t_0));
+if lam_n < 0
+    error("Initial condition will make it fly immediately")
+elseif mu*lam_n > abs(lam_t)
+    ie_slip = 2; % start out as sticking
+    ie_stick = 0;
+    ie_fly = 0;
+else
+    ie_slip = 0; % start out as slipping
+    ie_stick = 1;
+    ie_fly = 0;
+end
+
 % event_stick:value = [lam_t-mu*lam_n, -lam_t-mu*lam_n, r_R(2), r_Q(2), lam_n];
 % event_slip :value = [lam_n_slip, vt ,r_R(2),r_Q(2)];
 % event_fly  :value = [stop_fly,r_R(2),r_Q(2),angle_constraint];
@@ -44,38 +58,41 @@ while true
      ie_fly,...
      t_event_change,...
      event_order]          =    ground_simulation(t_tot,X_tot,ie_slip,ie_stick,ie_fly,t_event_change,event_order);
-        if ie_slip(end)==3 || ie_slip(end)==4 || ie_stick(end)==3 || ie_stick(end)==4
-            break
-        end
+ 
+    if ie_slip(end)==3 || ie_slip(end)==4 || ie_stick(end)==3 || ie_stick(end)==4
+        break
+    end
         
     lam_n = -1;     %just for keep running the simulation
     lam_n_slip = -1;%just for keep running the simulation
-        while lam_n < 0 && lam_n_slip < 0
-            [t_tot,...
-             X_tot,...
-             ie_fly,...
-             t_event_change,...
-             event_order]          =    air_simulation(t_tot,X_tot,t_event_change,event_order);
-            [lam_n,lam_t,lam_n_slip] = lam_calc(X_tot(end,:),tau_calc(t_tot(end)));
-            if ie_fly(end) ~= 1
-                animation_regarless_of_error
-                error("ie_fly")
-            end
-            % Impact
-            X0 = impact_law(X_fly(end,:));
-            X_tot(end,:) = X0;
-            disp("impacted:"+num2str(t_tot(end)))
+    
+    while lam_n_slip < 0
+        [t_tot,...
+         X_tot,...
+         ie_fly,...
+         t_event_change,...
+         event_order]          =    air_simulation(t_tot,X_tot,t_event_change,event_order);
+        if ie_fly(end) ~= 1 
+            animation_regarless_of_error
+            error("ie_fly")
         end
-
-    if lam_t-mu > lam_n
-        ie_stick = 1;
-        ie_slip = 0;
-    elseif lam_t-mu < lam_n
-        ie_stick = 2;
-        ie_slip = 0;
-    else
+        % Impact
+        X0 = impact_law(X_tot(end,:));
+        X_tot(end,:) = X0;
+        [lam_n,lam_t,lam_n_slip] = lam_calc(X_tot(end,:),tau_calc(t_tot(end)));
+    end
+    disp("flied:   "+num2str(t_tot(end)))% if ie_fly(end) == 4
+    event_order = [event_order;'Flied'];
+    t_event_change = [t_event_change t_tot(end)];
+    
+    if mu*lam_n > abs(lam_t)
+        ie_slip = 2; % start out as sticking
         ie_stick = 0;
-        ie_slip = 2;
+        ie_fly = 0;
+    else
+        ie_slip = 0; % start out as slipping
+        ie_stick = 1;
+        ie_fly = 0;
     end
 end
 
@@ -132,7 +149,7 @@ for k = 1:n
 end
 % Animation
 figure(1)
-for k = 1:n
+for k = 1:3:n
     plot([rR(k,1) rQ(k,1)],[rR(k,2) rQ(k,2)],'linewidth',3,'color','blue')
     grid on 
     grid minor
@@ -150,4 +167,3 @@ for k = 1:n
     text(lim*0.2,lim*0.85,txt2)
     drawnow limitrate
 end
-

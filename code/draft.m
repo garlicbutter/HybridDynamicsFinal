@@ -29,7 +29,7 @@ G = simplify(gradient(V,q));
 
 W = [1 0 0 0;0 1 0 0;];
 Wd = [0 0 0 0; 0 0 0 0;];
-lambda = simplify( (W*(M\W.'))\(W*(M\(B+G-Fq))));
+lambda = simplify( (W/M*W.') \ (W/M*(B+G-Fq)) );
 lambdat = lambda(1);
 lambdan = lambda(2);
 %% stick
@@ -37,6 +37,10 @@ rhs = simplify(M\(W.'*lambda+Fq-G-B));
 matlabFunction(rhs,'file','temp_stick_qdd')
 matlabFunction(lambdat,'file','temp_lam_t')
 matlabFunction(lambdan,'file','temp_lam_n')
+rhs = simplify( (W/M*W.') \ (W/M*(B+G)) );
+matlabFunction(rhs(1),'file','temp_stitk')
+matlabFunction(rhs(2),'file','temp_stink')
+
 %% slip
 syms sigma mu
 Wt = [1 0 0 0];
@@ -62,5 +66,6 @@ matlabFunction(rhs(3:4),'file','temp_slip_thetadd')
 %% fly
 rhs = simplify(M\(Fq-B-G));
 matlabFunction(rhs,'file','temp_fly_qdd')
-%% Inertia matrix
-matlabFunction(M,'file','temp_M')
+%% theta12dd
+rhs = simplify(M\(Fq-B-G));
+theta12dd = rhs(3)+rhs(4);

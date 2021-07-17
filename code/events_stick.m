@@ -33,7 +33,8 @@ r_R = r_Q + [2*L*cos(theta1+theta2);2*L*sin(theta1+theta2)];
 % isterminal = [1,1,1];
 % direction = [-1,-1,-1];
 
-value = [lam_t-mu*lam_n, -lam_t-mu*lam_n, r_R(2), r_Q(2), lam_n];
+
+value = [-lam_t+mu*lam_n, -lam_t-mu*lam_n, r_R(2), r_Q(2), lam_n];
 isterminal = ones(1,length(value));
 direction = [0,0,-1,-1,-1];
 end
